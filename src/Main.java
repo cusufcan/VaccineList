@@ -7,17 +7,17 @@ import java.util.Scanner;
 public class Main
 {
     public static Scanner scn = new Scanner(System.in);
-    public static boolean ciksinMi = false;
+    public static boolean isExit = false;
 
     public static void main(String[] args)
     {
-        while (!ciksinMi)
+        while (!isExit)
         {
-            MenuYaz();
+            PrintMenu();
         }
     }
 
-    public static void MenuYaz()
+    public static void PrintMenu()
     {
         System.out.println();
         System.out.println("              MENÜ              ");
@@ -32,16 +32,16 @@ public class Main
         switch (n)
         {
             case 1:
-                YeniKayit();
+                RegisterNew();
                 break;
             case 2:
-                RandevuAl();
+                MakeAnAppointment();
                 break;
             case 3:
-                RandevuListele();
+                ListAppointments();
                 break;
             case 0:
-                ciksinMi = true;
+                isExit = true;
                 break;
             default:
                 System.out.println("Anlaşılmadı. Lütfen tekrar deneyin...");
@@ -49,34 +49,34 @@ public class Main
         }
     }
 
-    public static void YeniKayit()
+    public static void RegisterNew()
     {
         System.out.print("Öğrenci NO: ");
-        int ogrNo = scn.nextInt();
+        int studentNum = scn.nextInt();
         scn.nextLine();
         System.out.print("Adı ve Soyadı: ");
-        String adSoyad = scn.nextLine();
+        String name = scn.nextLine();
 
-        boolean kayitVarMi = false;
+        boolean isExist = false;
 
         try
         {
-            File dosyaAdi = new File("asiListesi.txt");
-            String okunan = null;
-            if (dosyaAdi.exists())
+            File file = new File("asiListesi.txt");
+            String line = null;
+            if (file.exists())
             {
-                Scanner reader = new Scanner(dosyaAdi);
+                Scanner reader = new Scanner(file);
 
                 while (reader.hasNextLine())
                 {
-                    okunan = reader.nextLine();
-                    String[] bolunmusOkunan = okunan.split(",");
-                    for (int i = 0; i < bolunmusOkunan.length; i++)
+                    line = reader.nextLine();
+                    String[] dividedLine = line.split(",");
+                    for (int i = 0; i < dividedLine.length; i++)
                     {
-                        if (String.valueOf(ogrNo).equals(bolunmusOkunan[i]))
+                        if (String.valueOf(studentNum).equals(dividedLine[i]))
                         {
                             System.out.println("Bu öğrenci numarasına ait bir kayıt bulunmakta...");
-                            kayitVarMi = true;
+                            isExist = true;
                             break;
                         }
                     }
@@ -89,14 +89,14 @@ public class Main
             e.printStackTrace();
         }
 
-        if (!kayitVarMi)
+        if (!isExist)
         {
             try
             {
-                File dosyaAdi = new File("asiListesi.txt");
-                dosyaAdi.createNewFile();
+                File file = new File("asiListesi.txt");
+                file.createNewFile();
 
-                Scanner readerForLineCount = new Scanner(dosyaAdi);
+                Scanner readerForLineCount = new Scanner(file);
                 int lineCounter = 0;
                 while (readerForLineCount.hasNextLine())
                 {
@@ -109,21 +109,21 @@ public class Main
                 String[] tempArrVaccines = new String[lineCounter + 1];
                 String[] tempArrDates = new String[lineCounter + 1];
 
-                DosyayiDizilereCek(false, ogrNo, adSoyad, -1, 0, null, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
+                DosyayiDizilereCek(false, studentNum, name, -1, 0, null, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
 
-                FileWriter yazici = new FileWriter(dosyaAdi, false);
+                FileWriter writer = new FileWriter(file, false);
                 for (int i = 0; i < tempArrNum.length; i++)
                 {
                     if (tempArrVaccines[i] != null)
                     {
-                        yazici.write(tempArrNum[i] + ", " + tempArrNames[i] + ", " + tempArrVaccines[i] + ", " + tempArrDates[i] + ",\n");
+                        writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ", " + tempArrVaccines[i] + ", " + tempArrDates[i] + ",\n");
                     }
                     else
                     {
-                        yazici.write(tempArrNum[i] + ", " + tempArrNames[i] + ",\n");
+                        writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ",\n");
                     }
                 }
-                yazici.close();
+                writer.close();
 
                 System.out.println("Kaydınız başarılı bir şekilde yapılmıştır...");
             }
@@ -135,30 +135,30 @@ public class Main
         }
     }
 
-    public static void RandevuAl()
+    public static void MakeAnAppointment()
     {
         System.out.print("Öğrenci NO: ");
-        int ogrNo = scn.nextInt();
+        int studentNum = scn.nextInt();
 
         try
         {
             File file = new File("asiListesi.txt");
-            String okunan = null;
+            String read = null;
             Scanner reader = new Scanner(file);
 
             int posForVac = -1;
             int line = 0;
             while (reader.hasNextLine())
             {
-                okunan = reader.nextLine();
+                read = reader.nextLine();
                 line++;
-                String[] bolunmusOkunan = okunan.split(",");
-                for (int i = 0; i < bolunmusOkunan.length; i++)
+                String[] dividedLine = read.split(",");
+                for (int i = 0; i < dividedLine.length; i++)
                 {
-                    if (String.valueOf(ogrNo).equals(bolunmusOkunan[i]))
+                    if (String.valueOf(studentNum).equals(dividedLine[i]))
                     {
                         posForVac = line;
-                        System.out.println(bolunmusOkunan[i + 1].substring(1) + ":");
+                        System.out.println(dividedLine[i + 1].substring(1) + ":");
                         break;
                     }
                 }
@@ -196,19 +196,19 @@ public class Main
 
                 try
                 {
-                    FileWriter yazici = new FileWriter(file, false);
+                    FileWriter writer = new FileWriter(file, false);
                     for (int i = 0; i < tempArrNum.length; i++)
                     {
                         if (tempArrVaccines[i] != null)
                         {
-                            yazici.write(tempArrNum[i] + ", " + tempArrNames[i] + ", " + tempArrVaccines[i] + ", " + tempArrDates[i] + ",\n");
+                            writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ", " + tempArrVaccines[i] + ", " + tempArrDates[i] + ",\n");
                         }
                         else
                         {
-                            yazici.write(tempArrNum[i] + ", " + tempArrNames[i] + ",\n");
+                            writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ",\n");
                         }
                     }
-                    yazici.close();
+                    writer.close();
 
                     System.out.println("Randevunuz oluşturulmuştur...");
                 }
@@ -230,7 +230,7 @@ public class Main
         }
     }
 
-    public static void RandevuListele()
+    public static void ListAppointments()
     {
         try
         {
@@ -244,10 +244,10 @@ public class Main
             while (reader.hasNextLine())
             {
                 line = reader.nextLine();
-                String[] bolunmusOkunan = line.split(",");
-                if (bolunmusOkunan.length >= 3)
+                String[] dividedLine = line.split(",");
+                if (dividedLine.length >= 3)
                 {
-                    System.out.println("   " + lineIdx + "\t\t\t\t" + bolunmusOkunan[0] + "\t\t   " + bolunmusOkunan[1] + "\t  " + bolunmusOkunan[2] + "\t  " + bolunmusOkunan[3]);
+                    System.out.println("   " + lineIdx + "\t\t\t\t" + dividedLine[0] + "\t\t   " + dividedLine[1] + "\t  " + dividedLine[2] + "\t  " + dividedLine[3]);
                     lineIdx++;
                 }
             }

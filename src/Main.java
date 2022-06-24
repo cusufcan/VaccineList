@@ -109,7 +109,7 @@ public class Main
                 String[] tempArrVaccines = new String[lineCounter + 1];
                 String[] tempArrDates = new String[lineCounter + 1];
 
-                DosyayiDizilereCek(false, studentNum, name, -1, 0, null, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
+                ReturnArrayWithNewRegister(studentNum, name, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
 
                 FileWriter writer = new FileWriter(file, false);
                 for (int i = 0; i < tempArrNum.length; i++)
@@ -192,7 +192,7 @@ public class Main
                 String[] tempArrVaccines = new String[lineCounter];
                 String[] tempArrDates = new String[lineCounter];
 
-                DosyayiDizilereCek(true, -1, null, posForVac, vaccineNum, vaccineDate, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
+                ReturnArrayWithNewAppointment(vaccineNum, posForVac, vaccineDate, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
 
                 try
                 {
@@ -259,7 +259,101 @@ public class Main
         }
     }
 
-    public static void DosyayiDizilereCek(boolean isRegisterNewVac, int rNumber, String rName, int rPosForVac, int rVacNum, String rDate, int lineCounter, String[] tempArrNum, String[] tempArrNames, String[] tempArrVacNames, String[] tempArrDates)
+    public static void ReturnArrayWithNewRegister(int rNum, String rName, int lineCounter, String[] tempArrNum, String[] tempArrNames, String[] tempArrVacNames, String[] tempArrDates)
+    {
+        try
+        {
+            if (lineCounter > 0)
+            {
+                File fileName = new File("asiListesi.txt");
+                String line = null;
+                Scanner reader = new Scanner(fileName);
+
+                String[] numbers = new String[lineCounter];
+                String[] names = new String[lineCounter];
+                String[] vaccines = new String[lineCounter];
+                String[] dates = new String[lineCounter];
+
+                int arrayIdx = 0;
+
+                while (reader.hasNextLine())
+                {
+                    line = reader.nextLine();
+
+                    String[] dividedLine = line.split(",");
+
+                    numbers[arrayIdx] = dividedLine[0];
+                    names[arrayIdx] = dividedLine[1].substring(1);
+                    if(dividedLine.length >= 3)
+                    {
+                        vaccines[arrayIdx] = dividedLine[2].substring(1);
+                    }
+                    if (dividedLine.length == 4)
+                    {
+                        dates[arrayIdx] = dividedLine[3].substring(1);
+                    }
+                    arrayIdx++;
+                }
+
+                int pos = numbers.length;
+                for (int i = 0; i < numbers.length; i++)
+                {
+                    if (rNum <= Integer.valueOf(numbers[i]))
+                    {
+                        pos = i;
+                        break;
+                    }
+                }
+
+                for (int i = 0; i < pos; i++)
+                {
+                    tempArrVacNames[i] = vaccines[i];
+                    tempArrDates[i] = dates[i];
+                }
+
+                for (int i = 0; i <= pos; i++)
+                {
+                    if (i == pos)
+                    {
+                        tempArrNum[i] = String.valueOf(rNum);
+                        tempArrNames[i] = rName;
+                        break;
+                    }
+                    tempArrNum[i] = numbers[i];
+                    tempArrNames[i] = names[i];
+                }
+
+                for (int i = pos; i < numbers.length; i++)
+                {
+                    tempArrNum[i + 1] = numbers[i];
+                    tempArrNames[i + 1] = names[i];
+                    tempArrVacNames[i + 1] = vaccines[i];
+                    tempArrDates[i + 1] = dates[i];
+                }
+
+                if (numbers[numbers.length - 1] == null)
+                {
+                    numbers[numbers.length - 1] = String.valueOf(rNum);
+                    names[names.length - 1] = rName;
+                }
+            }
+            else
+            {
+                if (tempArrNum != null)
+                {
+                    tempArrNum[0] = String.valueOf(rNum);
+                    tempArrNames[0] = rName;
+                }
+            }
+        }
+        catch (FileNotFoundException e)
+        {
+            System.out.println("Okuma işleminde bir hata oluştu...");
+            e.printStackTrace();
+        }
+    }
+
+    public static void ReturnArrayWithNewAppointment(int rVacNum, int rPosForVac, String rDate, int lineCounter, String[] tempArrNum, String[] tempArrNames, String[] tempArrVacNames, String[] tempArrDates)
     {
         try
         {
@@ -311,72 +405,22 @@ public class Main
                     arrayIdx++;
                 }
 
-                if (rNumber != -1)
+                for (int i = 0; i < names.length; i++)
                 {
-                    int pos = numbers.length;
-                    for (int i = 0; i < numbers.length; i++)
-                    {
-                        if (rNumber <= Integer.valueOf(numbers[i]))
-                        {
-                            pos = i;
-                            break;
-                        }
-                    }
-
-                    for (int i = 0; i <= pos; i++)
-                    {
-                        if (i == pos)
-                        {
-                            tempArrNum[i] = String.valueOf(rNumber);
-                            tempArrNames[i] = rName;
-                            break;
-                        }
-                        tempArrNum[i] = numbers[i];
-                        tempArrNames[i] = names[i];
-                    }
-
-                    for (int i = pos; i < numbers.length; i++)
-                    {
-                        tempArrNum[i + 1] = numbers[i];
-                        tempArrNames[i + 1] = names[i];
-                    }
-
-                    if (numbers[numbers.length - 1] == null)
-                    {
-                        numbers[numbers.length - 1] = String.valueOf(rNumber);
-                        names[names.length - 1] = rName;
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < names.length; i++)
-                    {
-                        tempArrNum[i] = numbers[i];
-                        tempArrNames[i] = names[i];
-                    }
+                    tempArrNum[i] = numbers[i];
+                    tempArrNames[i] = names[i];
                 }
 
-                if (isRegisterNewVac)
-                {
-                    int pos = rPosForVac - 1;
+                int pos = rPosForVac - 1;
 
-                    for (int i = 0; i < vaccines.length; i++)
-                    {
-                        if (i == pos)
-                        {
-                            tempArrVacNames[i] = vaccineName;
-                            tempArrDates[i] = rDate;
-                        }
-                        else
-                        {
-                            tempArrVacNames[i] = vaccines[i];
-                            tempArrDates[i] = dates[i];
-                        }
-                    }
-                }
-                else
+                for (int i = 0; i < vaccines.length; i++)
                 {
-                    for (int i = 0; i < vaccines.length; i++)
+                    if (i == pos)
+                    {
+                        tempArrVacNames[i] = vaccineName;
+                        tempArrDates[i] = rDate;
+                    }
+                    else
                     {
                         tempArrVacNames[i] = vaccines[i];
                         tempArrDates[i] = dates[i];
@@ -385,17 +429,8 @@ public class Main
             }
             else
             {
-                if (tempArrNum != null)
-                {
-                    tempArrNum[0] = String.valueOf(rNumber);
-                    tempArrNames[0] = rName;
-                }
-
-                if (isRegisterNewVac)
-                {
-                    tempArrVacNames[0] = vaccineName;
-                    tempArrDates[0] = rDate;
-                }
+                tempArrVacNames[0] = vaccineName;
+                tempArrDates[0] = rDate;
             }
         }
         catch (FileNotFoundException e)

@@ -157,69 +157,82 @@ public class Main
                 {
                     if (String.valueOf(studentNum).equals(dividedLine[i]))
                     {
-                        posForVac = line;
-                        System.out.println(dividedLine[i + 1].substring(1) + ":");
+                        if (dividedLine.length <= 2)
+                        {
+                            posForVac = line;
+                            System.out.println(dividedLine[i + 1].substring(1) + ":");
+                        }
+                        else posForVac = -2;
+
                         break;
                     }
                 }
             }
 
-            if (posForVac != -1)
+            switch (posForVac)
             {
-                System.out.println();
-                System.out.println("              MENÜ              ");
-                System.out.println("________________________________");
-                System.out.println("Biontech                     1:");
-                System.out.println("Sinovac                      2:");
-                System.out.println("Sputnik                      3:");
-
-                System.out.print("\nLütfen aşı seçiminizi giriniz:");
-                int vaccineNum = scn.nextInt();
-                scn.nextLine();
-                System.out.print("Lütfen aşı tarihini giriniz  :");
-                String vaccineDate = scn.nextLine();
-
-                Scanner readerForLineCount = new Scanner(file);
-                int lineCounter = 0;
-                while (readerForLineCount.hasNextLine())
-                {
-                    lineCounter++;
-                    readerForLineCount.nextLine();
-                }
-
-                String[] tempArrNum = new String[lineCounter];
-                String[] tempArrNames = new String[lineCounter];
-                String[] tempArrVaccines = new String[lineCounter];
-                String[] tempArrDates = new String[lineCounter];
-
-                ReturnArrayWithNewAppointment(vaccineNum, posForVac, vaccineDate, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
-
-                try
-                {
-                    FileWriter writer = new FileWriter(file, false);
-                    for (int i = 0; i < tempArrNum.length; i++)
+                case -1:
+                    System.out.println("Bu öğrenci numarasına ait bir kayıt bulunmamakta...");
+                    break;
+                case -2:
+                    System.out.println("Zaten randevu alınmış...");
+                    break;
+                default:
+                    if (posForVac != -1)
                     {
-                        if (tempArrVaccines[i] != null)
+                        System.out.println();
+                        System.out.println("              MENÜ              ");
+                        System.out.println("________________________________");
+                        System.out.println("Biontech                     1:");
+                        System.out.println("Sinovac                      2:");
+                        System.out.println("Sputnik                      3:");
+
+                        System.out.print("\nLütfen aşı seçiminizi giriniz:");
+                        int vaccineNum = scn.nextInt();
+                        scn.nextLine();
+                        System.out.print("Lütfen aşı tarihini giriniz  :");
+                        String vaccineDate = scn.nextLine();
+
+                        Scanner readerForLineCount = new Scanner(file);
+                        int lineCounter = 0;
+                        while (readerForLineCount.hasNextLine())
                         {
-                            writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ", " + tempArrVaccines[i] + ", " + tempArrDates[i] + ",\n");
+                            lineCounter++;
+                            readerForLineCount.nextLine();
                         }
-                        else
+
+                        String[] tempArrNum = new String[lineCounter];
+                        String[] tempArrNames = new String[lineCounter];
+                        String[] tempArrVaccines = new String[lineCounter];
+                        String[] tempArrDates = new String[lineCounter];
+
+                        ReturnArrayWithNewAppointment(vaccineNum, posForVac, vaccineDate, lineCounter, tempArrNum, tempArrNames, tempArrVaccines, tempArrDates);
+
+                        try
                         {
-                            writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ",\n");
+                            FileWriter writer = new FileWriter(file, false);
+                            for (int i = 0; i < tempArrNum.length; i++)
+                            {
+                                if (tempArrVaccines[i] != null)
+                                {
+                                    writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ", " + tempArrVaccines[i] + ", " + tempArrDates[i] + ",\n");
+                                }
+                                else
+                                {
+                                    writer.write(tempArrNum[i] + ", " + tempArrNames[i] + ",\n");
+                                }
+                            }
+                            writer.close();
+
+                            System.out.println("Randevunuz oluşturulmuştur...");
+                        }
+                        catch (IOException e)
+                        {
+                            System.out.println("Yazma işleminde bir hata oluştu...");
+                            e.printStackTrace();
                         }
                     }
-                    writer.close();
-
-                    System.out.println("Randevunuz oluşturulmuştur...");
-                }
-                catch (IOException e)
-                {
-                    System.out.println("Yazma işleminde bir hata oluştu...");
-                    e.printStackTrace();
-                }
-            }
-            else{
-                System.out.println("Bu öğrenci numarasına ait bir kayıt bulunmamakta...");
+                    break;
             }
 
         }
@@ -235,21 +248,43 @@ public class Main
         try
         {
             File fileName = new File("asiListesi.txt");
+
+            String tempLine = null;
+            Scanner readerForLineCheck = new Scanner(fileName);
+            boolean isAnyAppointmentExists = false;
+            while(readerForLineCheck.hasNextLine())
+            {
+                tempLine = readerForLineCheck.nextLine();
+                String[] dividedLineForCheck = tempLine.split(",");
+                if (dividedLineForCheck.length >= 3)
+                {
+                    isAnyAppointmentExists = true;
+                    break;
+                }
+            }
+
             String line = null;
             Scanner reader = new Scanner(fileName);
             int lineIdx = 1;
 
-            System.out.println("\nSıra NO \t Öğrenci Numarası \t Adı Soyadı \t Aşı Firması \t Tarih");
-            System.out.println("_________________________________________________________________________");
-            while (reader.hasNextLine())
+            if (isAnyAppointmentExists)
             {
-                line = reader.nextLine();
-                String[] dividedLine = line.split(",");
-                if (dividedLine.length >= 3)
+                System.out.println("\nSıra NO \t Öğrenci Numarası \t Adı Soyadı \t Aşı Firması \t Tarih");
+                System.out.println("_________________________________________________________________________");
+                while (reader.hasNextLine())
                 {
-                    System.out.println("   " + lineIdx + "\t\t\t\t" + dividedLine[0] + "\t\t   " + dividedLine[1] + "\t  " + dividedLine[2] + "\t  " + dividedLine[3]);
-                    lineIdx++;
+                    line = reader.nextLine();
+                    String[] dividedLine = line.split(",");
+                    if (dividedLine.length >= 3)
+                    {
+                        System.out.println("   " + lineIdx + "\t\t\t " + dividedLine[0] + "\t  " + dividedLine[1] + "\t  " + dividedLine[2] + "\t  " + dividedLine[3]);
+                        lineIdx++;
+                    }
                 }
+            }
+            else
+            {
+                System.out.println("Herhangi bir randevu bulunmamaktadır...");
             }
         }
         catch (FileNotFoundException e)
